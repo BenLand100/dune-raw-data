@@ -195,22 +195,31 @@ namespace ptb {
 
 
        typedef struct trigger_t {
-           typedef uint64_t ts_size_t;
-           typedef uint64_t mask_size_t;
-           typedef uint8_t  wtype_size_t;
-
-           ts_size_t timestamp;
-
-           mask_size_t  trigger_word       : 61;
-           wtype_size_t word_type : 3;
-
-           static size_t const size_bytes = 2*sizeof(uint64_t);
-           static size_t const size_u32 = size_bytes/sizeof(uint32_t);
-
-           static size_t const n_bits_timestamp = 64;
-           static size_t const n_bits_tmask     = 61;
-           static size_t const n_bits_type      = 3;
-
+         
+	 typedef uint64_t ts_size_t;
+	 typedef uint64_t mask_size_t;
+	 typedef uint8_t  wtype_size_t;
+	 
+	 ts_size_t timestamp;
+	 
+	 mask_size_t  trigger_word       : 61;
+	 wtype_size_t word_type : 3;
+	 
+	 static size_t const size_bytes = 2*sizeof(uint64_t);
+	 static size_t const size_u32 = size_bytes/sizeof(uint32_t);
+	 
+	 static size_t const n_bits_timestamp = 64;
+	 static size_t const n_bits_tmask     = 61;
+	 static size_t const n_bits_type      = 3;
+	 
+	 bool IsHLT() const { return word_type == word_type::t_gt ; } 
+	 bool IsLLT() const { return word_type == word_type::t_lt ; } 
+	 bool IsTrigger( const unsigned int i ) const {
+	   if ( IsHLT() ) return trigger_word & ( 0x1 << i ) ;
+	   if ( IsLLT() ) return i == 0 ? false : trigger_word & ( 0x1 << (i-1) ) ;
+	   return false ;
+	 }
+	 
        } trigger_t;
 
     } // -- namespace word
