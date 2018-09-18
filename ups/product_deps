@@ -1,6 +1,6 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent dune_raw_data	v1_17_06
+parent dune_raw_data	v1_17_06a
 defaultqual    e15:online:s64
 
 # These optional lines define the installed directories where
@@ -26,11 +26,11 @@ product		version		optional
 art		v2_07_03	s50
 art		v2_10_02	s64
 art		v2_10_03	s65
-artdaq_core	v3_03_00	online
+artdaq_core	v3_04_01a	online
 TRACE		v3_13_07	online
 dunepdsprce     v0_0_4		online
 cetbuildtools	v7_02_01	online			only_for_build
-artdaq_core	v3_02_00	online_monitoring
+artdaq_core	v3_04_01a	online_monitoring
 TRACE		v3_13_04	online_monitoring
 dunepdsprce     v0_0_4		online_monitoring
 cetbuildtools	v5_08_01	online_monitoring	only_for_build
