@@ -8,11 +8,15 @@
 #ifndef DUNE_RAW_DATA_OVERLAYS_CTB_CONTENT_H_
 #define DUNE_RAW_DATA_OVERLAYS_CTB_CONTENT_H_ 
 
+#include <set>
+
 #include <cstdint>
 
 namespace ptb {
 
   namespace content {
+
+    using std::size_t ;
 
     // NFB: Note that order denotes bit order in the word:
     //      Upper fields are in the lsb and lower field is in the msb
@@ -211,11 +215,8 @@ namespace ptb {
 	 
 	 bool IsHLT() const { return word_type == word_type::t_gt ; } 
 	 bool IsLLT() const { return word_type == word_type::t_lt ; } 
-	 bool IsTrigger( const unsigned int i ) const {
-	   if ( IsHLT() ) return trigger_word & ( 0x1 << i ) ;
-	   if ( IsLLT() ) return i == 0 ? false : trigger_word & ( 0x1 << (i-1) ) ;
-	   return false ;
-	 }
+	 bool IsTrigger( const unsigned int i ) const  { return trigger_word & ( 0x1 << i ); }
+	 std::set<unsigned short> Triggers( size_t max_bit = n_bits_tmask ) const ;
 	 
        } trigger_t;
 
