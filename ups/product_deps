@@ -26,7 +26,7 @@ product		version		optional
 art		v2_07_03	s50
 art		v2_10_02	s64
 art		v2_10_03	s65
-artdaq_core	v3_04_01a	online
+artdaq_core	v3_04_02	online
 TRACE		v3_13_07	online
 dunepdsprce     v0_0_4		online
 cetbuildtools	v7_02_01	online			only_for_build
