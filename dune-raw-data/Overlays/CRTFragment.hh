@@ -1,18 +1,18 @@
 /* Author: Matthew Strait <mstrait@fnal.gov> */
 
-#ifndef artdaq_dune_Overlays_CRTFragment_hh
-#define artdaq_dune_Overlays_CRTFragment_hh
+#ifndef artdaq_demo_Overlays_CRTFragment_hh
+#define artdaq_demo_Overlays_CRTFragment_hh
 
 #include "artdaq-core/Data/Fragment.hh"
 
 #include <ostream>
 
-namespace dune
+namespace CRT
 {
-	class Fragment;
+  class Fragment;
 }
 
-class dune::Fragment
+class CRT::Fragment
 {
 public:
 
@@ -20,15 +20,29 @@ public:
     uint8_t magic; // must be 'M'
     uint8_t nhit;
     uint16_t module_num;
-    int32_t unixtime;
-    uint32_t fifty_mhz_time;
-  };
+
+    // The global ProtoDUNE-SP timestamp
+    uint64_t fifty_mhz_time;
+
+    // The raw timestamp held by the CRT's internal 32-bit counter.  You don't
+    // want to look at this unless you are a CRT expert.  Should start at zero
+    // at the start of the run, increment one-to-one with fifty_mhz_time, and
+    // roll over every 86 seconds.
+    uint32_t raw_backend_time;
+
+    // Must tell GCC not to add padding, even at the cost of performance,
+    // because this struct is describing exactly how the input data is
+    // laid out.
+  } __attribute__((packed));
 
   struct hit_t{
     uint8_t magic; // must be 'H'
     uint8_t channel;
     int16_t adc;
-  };
+
+    // This time, disabling padding doesn't make a difference in struct
+    // layout, but I am including it for consistency.
+  } __attribute__((packed));
 
   // Return the module number for this fragment.  A CRT fragment consists
   // of a set of hits sharing a time stamp from one module.
@@ -43,14 +57,14 @@ public:
     return header()->nhit;
   }
 
-  // Return the Unix timestamp (seconds since 1 Jan 1970)
-  int32_t unixtime()
+  // Return the value of the 50MHz counter that holds the raw internal CRT time
+  uint64_t raw_backend_time()
   {
-    return header()->unixtime;
+    return header()->raw_backend_time;
   }
 
-  // Return the value of the 50MHz counter
-  uint32_t fifty_mhz_time()
+  // Return the value of the 50MHz counter that holds the global ProtoDUNE time
+  uint64_t fifty_mhz_time()
   {
     return header()->fifty_mhz_time;
   }
@@ -58,7 +72,7 @@ public:
   // Return the channel number of the ith hit.  That hit must exist.
   uint8_t channel(const int i) const
   {
-    return hit(i)->adc;
+    return hit(i)->channel;
   }
 
   // Return the ADC value of the ith hit.  That hit must exist.
@@ -80,11 +94,11 @@ public:
     printf("CRT header: Magic = '%c'\n"
            "            n hit = %2u\n"
            "            module = %5u\n"
-           "            Unix time  = %10d (0x%8x)\n"
-           "            50Mhz time = %10u (0x%8x)\n",
+           "            50Mhz time = %10lu (0x%8lx)\n"
+           "            raw time   = %10u (0x%8x)\n",
            header()->magic, header()->nhit, header()->module_num,
-           header()->unixtime, header()->unixtime,
-           header()->fifty_mhz_time, header()->fifty_mhz_time);
+           header()->fifty_mhz_time, header()->fifty_mhz_time,
+           header()->raw_backend_time);
   }
 
   // Print the given hit to stdout, even if it is bad, but not if it
@@ -130,12 +144,6 @@ public:
     if(h->nhit > 64){
       fprintf(stderr, "CRT event has more hits (%d) than channels (64)\n",
               h->nhit);
-      return false;
-    }
-    if(h->unixtime < 1525147200){
-      // I know we didn't take data before 1 May 2018, so if it says it did,
-      // the data must be corrupt.
-      fprintf(stderr, "CRT Unix time (%d) is too early\n", h->unixtime);
       return false;
     }
     return true;
@@ -241,4 +249,4 @@ private:
   artdaq::Fragment const& thefrag;
 };
 
-#endif /* artdaq_dune_Overlays_CRTFragment_hh */
+#endif /* artdaq_demo_Overlays_CRTFragment_hh */
