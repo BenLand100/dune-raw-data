@@ -55,6 +55,14 @@ class CTBFragment {
   // tipically i is too big
   const ptb::content::word::word_t * operator [] ( unsigned int i ) const { return Word(i) ; }
 
+  // Each word coming from the board has it's own timestamp.
+  // Some of those words have a smaller number of bits dedicated to the TS.
+  // This methods returns the TS of the i-th word integrated the missing bits
+  //   from the other words in the fragments. 
+  // This is supposed to be the right way to retrieve the TS. 
+  uint64_t TimeStamp( unsigned int i ) const ; 
+
+
   // casted words depending on their type for easy deconding
   // An null pointer as a return means the requested cast is not correct
 
@@ -71,7 +79,7 @@ class CTBFragment {
   const ptb::content::word::ch_status_t* ChStatus( unsigned int i ) const ;
 
   // simple mask to make explicit that this was a TS word
-  const ptb::content::word::timestamp_t* Timestamp( unsigned int i ) const ;
+  const ptb::content::word::timestamp_t* TSWord( unsigned int i ) const ;
 
   // Trigger words
   // There are a number of trigger words, the complete list being
@@ -84,22 +92,25 @@ class CTBFragment {
   //static methods for casting
   static const ptb::content::word::feedback_t * Feedback ( const ptb::content::word::word_t & w ) ;
   static const ptb::content::word::ch_status_t* ChStatus ( const ptb::content::word::word_t & w ) ;
-  static const ptb::content::word::timestamp_t* Timestamp( const ptb::content::word::word_t & w ) ;
+  static const ptb::content::word::timestamp_t* TSWord   ( const ptb::content::word::word_t & w ) ;
   static const ptb::content::word::trigger_t*   Trigger  ( const ptb::content::word::word_t & w ) ;
 
   static constexpr unsigned int WordSize() { return sizeof( ptb::content::word::word_t ) ; } 
 
   friend std::ostream & operator << (std::ostream &, CTBFragment const & ) ;
   
+  const artdaq::Fragment & RawFragment() const { return artdaq_Fragment_ ; } 
+
 protected:
 
+  artdaq::Fragment const & artdaq_Fragment_;
   //maybe let's put some utilities here
 
 private:
 
   const unsigned int _n_words ;
 
-  artdaq::Fragment const & artdaq_Fragment_;
+
 
 };
 

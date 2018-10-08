@@ -136,45 +136,41 @@ namespace ptb {
 
 
       typedef struct ch_status_t {
-           typedef uint64_t ts_size_t;
-           typedef uint64_t pds_size_t;
-           typedef uint64_t crt_size_t;
-           typedef uint64_t beam_size_t;
-           typedef uint64_t wtype_size_t;
-
-           ts_size_t     timestamp  : 60;
-           beam_size_t   beam_lo    : 4;
-           beam_size_t   beam_hi    : 5;
-           crt_size_t    crt        : 32;
-           pds_size_t    pds        : 24;
-           wtype_size_t  word_type  : 3;
-
-
-           static size_t const size_bytes = 2*sizeof(uint64_t);
-           static size_t const size_u32 = size_bytes/sizeof(uint32_t);
-
-           static size_t const n_bits_timestamp  = 60;
-           static size_t const n_bits_payload = 32;
-           static size_t const n_bits_type = 3;
-
-
-           // aux_functions
-	   beam_size_t get_beam() const {return (beam_hi << 4 | beam_lo);}
-           crt_size_t  get_crt()  const {return (crt & 0xFFFFFFFF);}
-           pds_size_t  get_pds()  const {return (pds & 0xFFFFFFF);}
-
-           bool get_state_crt(const uint16_t channel) {
-             return ((crt & (0x1 << channel)) != 0x0);
-           }
-           bool get_state_pds(const uint16_t channel) {
-             return ((pds & (0x1 << channel)) != 0x0);
-           }
-           bool get_state_beam(const uint16_t channel) {
-             return (((beam_hi << 4 | beam_lo) & (0x1 << channel)) != 0x0);
-           }
+	typedef uint64_t ts_size_t;
+	typedef uint64_t pds_size_t;
+	typedef uint64_t crt_size_t;
+	typedef uint64_t beam_size_t;
+	typedef uint64_t wtype_size_t;
+	
+	ts_size_t     timestamp  : 60;
+	beam_size_t   beam_lo    : 4;
+	beam_size_t   beam_hi    : 5;
+	crt_size_t    crt        : 32;
+	pds_size_t    pds        : 24;
+	wtype_size_t  word_type  : 3;
+	
+	
+	static size_t const size_bytes = 2*sizeof(uint64_t);
+	static size_t const size_u32 = size_bytes/sizeof(uint32_t);
+	
+	static size_t const n_bits_timestamp  = 60;
+	static size_t const n_bits_payload = 32;
+	static size_t const n_bits_type = 3;
+	
+	// aux_functions
+	beam_size_t get_beam() const {return (beam_hi << 4 | beam_lo);}
+	crt_size_t  get_crt()  const {return (crt & 0xFFFFFFFF);}
+	pds_size_t  get_pds()  const {return pds; }
+	
+	bool get_state_crt (const uint16_t channel) const { return ( crt & (0x1 << channel) ) ; }
+	bool get_state_pds (const uint16_t channel) const { return ( pds & (0x1 << channel) ) ; }
+	bool get_state_beam(const uint16_t channel) const { return ( get_beam() & (0x1 << channel) ) ; } 
+	
+	std::set<unsigned short> beam_channels() const ;
+	std::set<unsigned short>  crt_channels() const ;
+	std::set<unsigned short>  pds_channels() const ;
 
        } ch_status_t;
-
 
 
        typedef struct timestamp_t {

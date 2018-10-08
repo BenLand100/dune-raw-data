@@ -14,14 +14,14 @@ namespace dune {
       if ( f.Trigger(i) ) {
         out << "Trigger word " << std::hex << f.Trigger(i) -> word_type
             << ", payload: "  << f.Trigger(i) -> trigger_word
-            << ", TS: " << f.Trigger(i) -> timestamp << std::dec << std::endl ;
+            << ", TS: " << f.TimeStamp(i) << std::dec << std::endl ;
       }
       else if ( f.ChStatus(i) ) {
 	out << "Check Status word " << std::hex 
             << " PDS " << f.ChStatus(i) -> get_pds() 
             << ", CRT: " << f.ChStatus(i) -> get_crt()
 	    << ", Beam: " << f.ChStatus(i) -> get_beam() 
-	    << ", TS: " << f.ChStatus(i) -> timestamp
+	    << ", TS: " << f.TimeStamp(i) 
 	    << std::dec << std::endl ;
 
       }
@@ -30,13 +30,13 @@ namespace dune {
 	    << ", Padding: " << f.Feedback(i) -> padding
 	    << ", Source: " << f.Feedback(i) -> source
 	    << ", Code: " << f.Feedback(i) -> code
-            << ", TS: " << f.Feedback(i) -> timestamp << std::dec << std::endl ;
+            << ", TS: " << f.TimeStamp(i) << std::dec << std::endl ;
 
       }
       else {
 	out << "type: " << std::hex << f.Word(i) -> word_type 
 	    << ", payload: " << f.Word(i) -> payload 
-	    << ", TS: " << f.Word(i) -> timestamp << std::dec << std::endl ;
+	    << ", TS: " << f.TimeStamp(i) << std::dec << std::endl ;
       }
 
     }
@@ -48,10 +48,30 @@ namespace dune {
 
 
   CTBFragment::CTBFragment( artdaq::Fragment const & f ) : 
+    artdaq_Fragment_( f ),
+    _n_words( f.dataSizeBytes() % CTBFragment::WordSize() == 0 ? f.dataSizeBytes()/CTBFragment::WordSize() : 0 )
 
-    _n_words( f.dataSizeBytes()/CTBFragment::WordSize() ),
-    artdaq_Fragment_( f ) 
   { ; } 
+
+
+  //---------------------------------
+  // Proper TS getter
+  //---------------------------------
+
+  uint64_t CTBFragment::TimeStamp( unsigned int i ) const {
+
+    const ptb::content::word::word_t* w = Word(i) ;
+
+
+    if ( w -> word_type == ptb::content::word::t_ch ) {
+      // ch status words have 4 less bits in the MSB
+      // the missing bits are recovered from the fragment TS
+      return ( (artdaq_Fragment_.timestamp() & 0xF0000000) | CTBFragment::ChStatus( *w ) -> timestamp ) ;
+    }
+
+    return w -> timestamp ;
+  }
+
 
 
   //--------------------------------
@@ -89,13 +109,13 @@ namespace dune {
   }
 
  
-  const ptb::content::word::timestamp_t* CTBFragment::Timestamp( unsigned int i ) const {
+  const ptb::content::word::timestamp_t* CTBFragment::TSWord( unsigned int i ) const {
 
     const ptb::content::word::word_t* w = Word( i )  ;
 
     if ( ! w )  return nullptr ;
 
-    return CTBFragment::Timestamp( *w ) ;
+    return CTBFragment::TSWord( *w ) ;
 
   }
 
@@ -130,7 +150,7 @@ namespace dune {
 
   }
 
-  const ptb::content::word::timestamp_t* CTBFragment::Timestamp( const ptb::content::word::word_t & w ) {
+  const ptb::content::word::timestamp_t* CTBFragment::TSWord( const ptb::content::word::word_t & w ) {
   
     if ( w.word_type != ptb::content::word::t_ts ) return nullptr ;
 
