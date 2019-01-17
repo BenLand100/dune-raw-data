@@ -221,50 +221,50 @@ class dune::FelixFragmentHits : public dune::FelixFragmentBase {
       : FelixFragmentBase(fragment) {}
 
   /* Frame field and accessors. */
-  virtual uint8_t sof(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint8_t version(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint8_t fiber_no(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint8_t slot_no(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint8_t crate_no(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint8_t mm(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint8_t oos(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint16_t wib_errors(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint64_t timestamp(const unsigned& frame_ID = 0) const { return 0; }
-  virtual uint16_t wib_counter(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint8_t sof(const unsigned& ) const { return 0; }
+  virtual uint8_t version(const unsigned& ) const { return 0; }
+  virtual uint8_t fiber_no(const unsigned& ) const { return 0; }
+  virtual uint8_t slot_no(const unsigned& ) const { return 0; }
+  virtual uint8_t crate_no(const unsigned& ) const { return 0; }
+  virtual uint8_t mm(const unsigned& ) const { return 0; }
+  virtual uint8_t oos(const unsigned& ) const { return 0; }
+  virtual uint16_t wib_errors(const unsigned& ) const { return 0; }
+  virtual uint64_t timestamp(const unsigned& ) const { return 0; }
+  virtual uint16_t wib_counter(const unsigned& ) const { return 0; }
 
   /* Coldata block accessors. */
-  virtual uint8_t s1_error(const unsigned& frame_ID,
-                           const uint8_t& block_num) const { return 0; }
-  virtual uint8_t s2_error(const unsigned& frame_ID,
-                           const uint8_t& block_num) const { return 0; }
-  virtual uint16_t checksum_a(const unsigned& frame_ID,
-                              const uint8_t& block_num) const { return 0; }
-  virtual uint16_t checksum_b(const unsigned& frame_ID,
-                              const uint8_t& block_num) const { return 0; }
-  virtual uint16_t coldata_convert_count(const unsigned& frame_ID,
-                                         const uint8_t& block_num) const { return 0; }
-  virtual uint16_t error_register(const unsigned& frame_ID,
-                                  const uint8_t& block_num) const { return 0; }
-  virtual uint8_t hdr(const unsigned& frame_ID, const uint8_t& block_num,
-                      const uint8_t& hdr_num) const { return 0; }
+  virtual uint8_t s1_error(const unsigned&,
+                           const uint8_t&) const { return 0; }
+  virtual uint8_t s2_error(const unsigned&,
+                           const uint8_t&) const { return 0; }
+  virtual uint16_t checksum_a(const unsigned&,
+                              const uint8_t&) const { return 0; }
+  virtual uint16_t checksum_b(const unsigned&,
+                              const uint8_t&) const { return 0; }
+  virtual uint16_t coldata_convert_count(const unsigned&,
+                                         const uint8_t&) const { return 0; }
+  virtual uint16_t error_register(const unsigned&,
+                                  const uint8_t&) const { return 0; }
+  virtual uint8_t hdr(const unsigned&, const uint8_t&,
+                      const uint8_t&) const { return 0; }
 
   // Functions to return a certain ADC value.
-  virtual adc_t get_ADC(const unsigned& frame_ID, const uint8_t block_ID,
-                        const uint8_t channel_ID) const { return 0; }
-  virtual adc_t get_ADC(const unsigned& frame_ID,
-                        const uint8_t channel_ID) const { return 0; }
+  virtual adc_t get_ADC(const unsigned&, const uint8_t,
+                        const uint8_t) const { return 0; }
+  virtual adc_t get_ADC(const unsigned&,
+                        const uint8_t) const { return 0; }
 
   // Function to return all ADC values for a single channel.
-  virtual adc_v get_ADCs_by_channel(const uint8_t block_ID,
-                                    const uint8_t channel_ID) const { return 0; }
-  virtual adc_v get_ADCs_by_channel(const uint8_t channel_ID) const { return 0; }
+  virtual adc_v get_ADCs_by_channel(const uint8_t,
+                                    const uint8_t) const { return {}; }
+    virtual adc_v get_ADCs_by_channel(const uint8_t) const { return {}; }
   // Function to return all ADC values for all channels in a map.
-  virtual std::map<uint8_t, adc_v> get_all_ADCs() const { return 0; }
+    virtual std::map<uint8_t, adc_v> get_all_ADCs() const { return {}; }
 
   // Function to print all timestamps.
   virtual void print_timestamps() const {};
 
-  virtual void print(const unsigned i) const {};
+  virtual void print(const unsigned) const {};
 
   virtual void print_frames() const {};
 
