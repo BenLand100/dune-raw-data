@@ -26,6 +26,7 @@ class FelixFragmentBase;
 class FelixFragmentUnordered;
 class FelixFragmentReordered;
 class FelixFragmentCompressed;
+class FelixFragmentHits;
 class FelixFragment;
 }  // namespace dune
 
@@ -132,7 +133,7 @@ class dune::FelixFragmentBase {
         sizeBytes_(fragment.dataSizeBytes()) {
 
     // Check whether the metadata is of the old format.
-    if(meta_.control_word != 0xabc) {
+    if(meta_.control_word != 0xabc && meta_.control_word != 0xcba) {
       // mf::LogInfo("dune::FelixFragment") << "Fragment has old metadata format.";
       const Old_Metadata* old_meta = fragment.metadata<Old_Metadata>();
       meta_ = {0,
@@ -206,6 +207,79 @@ class dune::FelixFragmentBase {
   const void* artdaq_Fragment_;
   size_t sizeBytes_;
 }; // class dune::FelixFragmentBase
+
+
+//==================================================
+// FELIX fragment for an array of FELIX hits
+//==================================================
+class dune::FelixFragmentHits : public dune::FelixFragmentBase {
+ public:
+
+  // The constructor simply sets its const private member "artdaq_Fragment_"
+  // to refer to the artdaq::Fragment object
+  FelixFragmentHits(artdaq::Fragment const& fragment)
+      : FelixFragmentBase(fragment) {}
+
+  /* Frame field and accessors. */
+  virtual uint8_t sof(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint8_t version(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint8_t fiber_no(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint8_t slot_no(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint8_t crate_no(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint8_t mm(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint8_t oos(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint16_t wib_errors(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint64_t timestamp(const unsigned& frame_ID = 0) const { return 0; }
+  virtual uint16_t wib_counter(const unsigned& frame_ID = 0) const { return 0; }
+
+  /* Coldata block accessors. */
+  virtual uint8_t s1_error(const unsigned& frame_ID,
+                           const uint8_t& block_num) const { return 0; }
+  virtual uint8_t s2_error(const unsigned& frame_ID,
+                           const uint8_t& block_num) const { return 0; }
+  virtual uint16_t checksum_a(const unsigned& frame_ID,
+                              const uint8_t& block_num) const { return 0; }
+  virtual uint16_t checksum_b(const unsigned& frame_ID,
+                              const uint8_t& block_num) const { return 0; }
+  virtual uint16_t coldata_convert_count(const unsigned& frame_ID,
+                                         const uint8_t& block_num) const { return 0; }
+  virtual uint16_t error_register(const unsigned& frame_ID,
+                                  const uint8_t& block_num) const { return 0; }
+  virtual uint8_t hdr(const unsigned& frame_ID, const uint8_t& block_num,
+                      const uint8_t& hdr_num) const { return 0; }
+
+  // Functions to return a certain ADC value.
+  virtual adc_t get_ADC(const unsigned& frame_ID, const uint8_t block_ID,
+                        const uint8_t channel_ID) const { return 0; }
+  virtual adc_t get_ADC(const unsigned& frame_ID,
+                        const uint8_t channel_ID) const { return 0; }
+
+  // Function to return all ADC values for a single channel.
+  virtual adc_v get_ADCs_by_channel(const uint8_t block_ID,
+                                    const uint8_t channel_ID) const { return 0; }
+  virtual adc_v get_ADCs_by_channel(const uint8_t channel_ID) const { return 0; }
+  // Function to return all ADC values for all channels in a map.
+  virtual std::map<uint8_t, adc_v> get_all_ADCs() const { return 0; }
+
+  // Function to print all timestamps.
+  virtual void print_timestamps() const {};
+
+  virtual void print(const unsigned i) const {};
+
+  virtual void print_frames() const {};
+
+  virtual ~FelixFragmentHits() {}
+
+  // The number of words in the current event minus the header.
+  virtual size_t total_words() const { return 0; }
+  // The number of frames in the current event.
+  virtual size_t total_frames() const { return 0; }
+  // The number of ADC values describing data beyond the header
+  virtual size_t total_adc_values() const { return 0; }
+
+ protected:
+
+}; // class dune::FelixFragmentHits
 
 //==================================================
 // FELIX fragment for an array of bare FELIX frames
@@ -755,7 +829,9 @@ class dune::FelixFragment : public FelixFragmentBase {
  public:
   FelixFragment(const artdaq::Fragment& fragment)
       : FelixFragmentBase(fragment) {
-    if(meta_.compressed) {
+    if(meta_.control_word==0xcba){
+      flxfrag = new FelixFragmentHits(fragment);
+    } else if(meta_.compressed) {
       flxfrag = new FelixFragmentCompressed(fragment);
     } else if (meta_.reordered) {
       flxfrag = new FelixFragmentReordered(fragment);
