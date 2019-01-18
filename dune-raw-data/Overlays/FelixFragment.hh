@@ -7,6 +7,7 @@
 #include "FragmentType.hh"
 #include "artdaq-core/Data/Fragment.hh"
 #include "dune-raw-data/Overlays/FelixFormat.hh"
+#include "dune-raw-data/Overlays/FelixHitFormat.hh"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <iostream>
@@ -215,10 +216,31 @@ class dune::FelixFragmentBase {
 class dune::FelixFragmentHits : public dune::FelixFragmentBase {
  public:
 
+  // The following structure is overlayed onto the data in the
+  // fragment, starting at the beginning.
+  struct Body {
+    uint64_t timestamp;
+    uint32_t nhits;
+      // We have an array of TriggerPrimitive of unknown size
+      // beginning in memory at this point, so use a "flexible array
+      // member". Not sure how to do this more nicely, when we have to
+      // have contiguous memory for the fragment
+      dune::TriggerPrimitive primitives[];
+  };
+    
   // The constructor simply sets its const private member "artdaq_Fragment_"
   // to refer to the artdaq::Fragment object
   FelixFragmentHits(artdaq::Fragment const& fragment)
       : FelixFragmentBase(fragment) {}
+
+  // Here are the getters
+  uint64_t get_timestamp() const  { return body_()->timestamp;  }
+  uint32_t get_nhits() const    { return body_()->nhits;    }
+  const dune::TriggerPrimitive& get_primitive(int i) const { return body_()->primitives[i]; }
+  dune::TriggerPrimitive& get_primitive(int i) { return body_()->primitives[i]; }
+
+  void set_timestamp(uint64_t timestamp) { body_()->timestamp=timestamp;  }
+  void set_nhits(uint32_t nhits) {  body_()->nhits=nhits;    }
 
   /* Frame field and accessors. */
   virtual uint8_t sof(const unsigned& ) const { return 0; }
@@ -278,6 +300,13 @@ class dune::FelixFragmentHits : public dune::FelixFragmentBase {
   virtual size_t total_adc_values() const { return 0; }
 
  protected:
+    // artdaq_Fragment_ already points to dataBeginBytes(), thanks to the FelixFragmentBase constructor
+    Body const * body_() const {
+        return reinterpret_cast<FelixFragmentHits::Body const *>( artdaq_Fragment_);
+    }
+    Body * body_() {
+        return reinterpret_cast<FelixFragmentHits::Body*>(const_cast<void*>(artdaq_Fragment_));
+    }
 
 }; // class dune::FelixFragmentHits
 
