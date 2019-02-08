@@ -5,8 +5,18 @@ namespace dune
 {
     struct TriggerPrimitive
     {
+        TriggerPrimitive(uint16_t channel_,
+                         uint64_t startTime_,
+                         uint16_t charge_,
+                         uint16_t timeOverThreshold_)
+            : channel(channel_), 
+              startTime(startTime_), 
+              charge(charge_), 
+              timeOverThreshold(timeOverThreshold_)
+        {}
+
         uint16_t channel;
-        uint16_t startTimeOffset; // relative to 64-bit timestamp
+        uint64_t startTime;
         uint16_t charge;
         uint16_t timeOverThreshold;
     };
