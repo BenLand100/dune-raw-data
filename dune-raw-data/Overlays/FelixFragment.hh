@@ -220,6 +220,9 @@ class dune::FelixFragmentHits : public dune::FelixFragmentBase {
   // fragment, starting at the beginning.
   struct Body {
     uint64_t timestamp;
+    uint8_t fiber_no;
+    uint8_t slot_no;
+    uint8_t crate_no;
     uint32_t nhits;
       // We have an array of TriggerPrimitive of unknown size
       // beginning in memory at this point, so use a "flexible array
@@ -235,11 +238,19 @@ class dune::FelixFragmentHits : public dune::FelixFragmentBase {
 
   // Here are the getters
   uint64_t get_timestamp() const  { return body_()->timestamp;  }
+  uint8_t get_fiber_no() const { return body_()->fiber_no; }
+  uint8_t get_slot_no() const { return body_()->slot_no; }
+  uint8_t get_crate_no() const { return body_()->crate_no; }
+
   uint32_t get_nhits() const    { return body_()->nhits;    }
   const dune::TriggerPrimitive& get_primitive(int i) const { return body_()->primitives[i]; }
   dune::TriggerPrimitive& get_primitive(int i) { return body_()->primitives[i]; }
 
   void set_timestamp(uint64_t timestamp) { body_()->timestamp=timestamp;  }
+  void set_fiber_no(uint8_t fiber_no) { body_()->fiber_no=fiber_no; }
+  void set_slot_no(uint8_t slot_no) { body_()->slot_no=slot_no; }
+  void set_crate_no(uint8_t crate_no) { body_()->crate_no=crate_no; }
+
   void set_nhits(uint32_t nhits) {  body_()->nhits=nhits;    }
 
   /* Frame field and accessors. */
