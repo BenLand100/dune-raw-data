@@ -220,6 +220,7 @@ class dune::FelixFragmentHits : public dune::FelixFragmentBase {
   // fragment, starting at the beginning.
   struct Body {
     uint64_t timestamp;
+    uint32_t window_offset;
     uint8_t fiber_no;
     uint8_t slot_no;
     uint8_t crate_no;
@@ -238,6 +239,7 @@ class dune::FelixFragmentHits : public dune::FelixFragmentBase {
 
   // Here are the getters
   uint64_t get_timestamp() const  { return body_()->timestamp;  }
+  uint32_t get_window_offset() const  { return body_()->window_offset;  }
   uint8_t get_fiber_no() const { return body_()->fiber_no; }
   uint8_t get_slot_no() const { return body_()->slot_no; }
   uint8_t get_crate_no() const { return body_()->crate_no; }
@@ -247,6 +249,7 @@ class dune::FelixFragmentHits : public dune::FelixFragmentBase {
   dune::TriggerPrimitive& get_primitive(int i) { return body_()->primitives[i]; }
 
   void set_timestamp(uint64_t timestamp) { body_()->timestamp=timestamp;  }
+  void set_window_offset(uint32_t offset) { body_()->window_offset=offset;  }
   void set_fiber_no(uint8_t fiber_no) { body_()->fiber_no=fiber_no; }
   void set_slot_no(uint8_t slot_no) { body_()->slot_no=slot_no; }
   void set_crate_no(uint8_t crate_no) { body_()->crate_no=crate_no; }
