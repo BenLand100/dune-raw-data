@@ -54,7 +54,11 @@ cet_report_compiler_flags()
 
 # these are minimum required versions, not the actual product versions
 find_ups_product( cetbuildtools v5_06_06 )
-find_ups_product( artdaq_core v1_06_01 )
+
+# JCF, May-9-2019
+# Removing ups product minimums for the artdaq packages so that
+# dev-versioning can be used on ProtoDUNE
+find_ups_product( artdaq_core ) # v1_06_01 )
 find_ups_product( art v2_03_00 )
 find_ups_product( cetlib v1_03_00 )
 find_ups_boost( v1_50_0 filesystem
