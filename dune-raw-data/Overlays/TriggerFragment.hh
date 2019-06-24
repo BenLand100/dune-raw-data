@@ -100,12 +100,14 @@ class dune::TriggerFragment {
     uint32_t count;
     uint32_t partid;
     uint32_t sources;
-    uint32_t tstart;
-    uint32_t tspan;
+    uint32_t tstartl;
+    uint32_t tstarth;
+    uint32_t tspanl;
+    uint32_t tspanh;
     uint32_t  modid;
     uint32_t  submodids;
 //
-    static size_t const size = 19ul;   // Units of header uint32_t
+    static size_t const size = 21ul;   // Units of header uint32_t
   };
   // Update this version number if you update anything in the class!
   static constexpr uint32_t VERSION = 1;
@@ -139,8 +141,12 @@ class dune::TriggerFragment {
   uint32_t get_count() const  { return body_()->count;  }
   uint32_t get_partid() const    { return body_()->partid;    }
   uint32_t get_sources() const    { return body_()->sources;    }
-  uint32_t get_tstart() const { return body_()->tstart; }
-  uint32_t get_tspan() const { return body_()->tspan; }
+  uint64_t get_tstart() const { 
+    return make_tstamp64(body_()->tstartl, body_()->tstarth);
+  } 
+  uint64_t get_tspan() const { 
+    return make_tstamp64(body_()->tspanl, body_()->tspanh);
+  } 
   uint32_t get_modid() const { return body_()->modid; }
   uint32_t get_submodids() const { return body_()->submodids; }
 
