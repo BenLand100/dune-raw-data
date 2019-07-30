@@ -98,9 +98,19 @@ include(UseCPack)
 # be the newest version of the form
 # v<int>_<int><int>_<int><int><letter> - e.g., v3_00_06v
 
+
+if ( NOT DEFINED ENV{HOSTNAME} )
+
+MESSAGE(FATAL_ERROR "You need to have the HOSTNAME environment variable defined for the build to work")
+
+elseif ( $ENV{HOSTNAME} MATCHES "^np04-srv-.*" )
+
 execute_process(COMMAND bash "-c" "daqinterface_version=$( \
 ls /nfs/sw/artdaq/products/artdaq_daqinterface | grep -E \"^v[0-9]_[0-9]{2}_[0-9]{2}.$\" | sort -n | tail -1 ) ; \
 echo DAQInterface version used to save commit info is $daqinterface_version ; \
 . /nfs/sw/artdaq/products/setup; \
 setup artdaq_daqinterface $daqinterface_version; \
 python $ARTDAQ_DAQINTERFACE_DIR/rc/control/utilities.py get_commit_info dune-raw-data $MRB_SOURCE/dune_raw_data $MRB_INSTALL/.." )
+
+endif()
+
