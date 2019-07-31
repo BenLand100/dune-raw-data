@@ -15,7 +15,6 @@ namespace dune {
           "FELIX",
           "CRT",
           "CTB",
-          "FELIXHITS",
           "CPUHITS",
           "DEVBOARDHITS",
           "UNKNOWN" };
@@ -32,7 +31,6 @@ namespace dune {
         FELIX,
         CRT,
 	CTB,
-        FELIXHITS,
         CPUHITS,
         DEVBOARDHITS,
         INVALID // Should always be last.
