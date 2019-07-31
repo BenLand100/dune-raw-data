@@ -39,6 +39,9 @@ namespace dune
             dune::TriggerPrimitive primitives[];
         };
     
+        // Update this version number if you update anything in the class!
+        static constexpr uint32_t VERSION = 1;
+
         // The constructor simply sets its const private member "artdaq_Fragment_"
         // to refer to the artdaq::Fragment object
         CPUHitsFragment(artdaq::Fragment& fragment)
