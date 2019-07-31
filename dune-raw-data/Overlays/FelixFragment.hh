@@ -7,7 +7,6 @@
 #include "FragmentType.hh"
 #include "artdaq-core/Data/Fragment.hh"
 #include "dune-raw-data/Overlays/FelixFormat.hh"
-#include "dune-raw-data/Overlays/FelixHitFormat.hh"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include <iostream>
@@ -133,7 +132,7 @@ class dune::FelixFragmentBase {
         sizeBytes_(fragment.dataSizeBytes()) {
 
     // Check whether the metadata is of the old format.
-    if(meta_.control_word != 0xabc && meta_.control_word != 0xcba) {
+    if(meta_.control_word != 0xabc) {
       // mf::LogInfo("dune::FelixFragment") << "Fragment has old metadata format.";
       const Old_Metadata* old_meta = fragment.metadata<Old_Metadata>();
       meta_ = {0,
