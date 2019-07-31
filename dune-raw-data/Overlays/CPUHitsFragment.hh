@@ -2,6 +2,7 @@
 #define artdaq_dune_Overlays_CPUHitsFragment_hh
 #include "FragmentType.hh"
 #include "artdaq-core/Data/Fragment.hh"
+#include "dune-raw-data/Overlays/FelixHitFormat.hh"
 
 namespace dune
 {
