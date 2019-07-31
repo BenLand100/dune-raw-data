@@ -27,7 +27,6 @@ class FelixFragmentBase;
 class FelixFragmentUnordered;
 class FelixFragmentReordered;
 class FelixFragmentCompressed;
-class FelixFragmentHits;
 class FelixFragment;
 }  // namespace dune
 
@@ -208,121 +207,6 @@ class dune::FelixFragmentBase {
   const void* artdaq_Fragment_;
   size_t sizeBytes_;
 }; // class dune::FelixFragmentBase
-
-
-//==================================================
-// FELIX fragment for an array of FELIX hits
-//==================================================
-class dune::FelixFragmentHits : public dune::FelixFragmentBase {
- public:
-
-  // The following structure is overlayed onto the data in the
-  // fragment, starting at the beginning.
-  struct Body {
-    uint64_t timestamp;
-    uint32_t window_offset;
-    uint8_t fiber_no;
-    uint8_t slot_no;
-    uint8_t crate_no;
-    uint32_t nhits;
-      // We have an array of TriggerPrimitive of unknown size
-      // beginning in memory at this point, so use a "flexible array
-      // member". Not sure how to do this more nicely, when we have to
-      // have contiguous memory for the fragment
-      dune::TriggerPrimitive primitives[];
-  };
-    
-  // The constructor simply sets its const private member "artdaq_Fragment_"
-  // to refer to the artdaq::Fragment object
-  FelixFragmentHits(artdaq::Fragment const& fragment)
-      : FelixFragmentBase(fragment) {}
-
-  // Here are the getters
-  uint64_t get_timestamp() const  { return body_()->timestamp;  }
-  uint32_t get_window_offset() const  { return body_()->window_offset;  }
-  uint8_t get_fiber_no() const { return body_()->fiber_no; }
-  uint8_t get_slot_no() const { return body_()->slot_no; }
-  uint8_t get_crate_no() const { return body_()->crate_no; }
-
-  uint32_t get_nhits() const    { return body_()->nhits;    }
-  const dune::TriggerPrimitive& get_primitive(int i) const { return body_()->primitives[i]; }
-  dune::TriggerPrimitive& get_primitive(int i) { return body_()->primitives[i]; }
-
-  void set_timestamp(uint64_t timestamp) { body_()->timestamp=timestamp;  }
-  void set_window_offset(uint32_t offset) { body_()->window_offset=offset;  }
-  void set_fiber_no(uint8_t fiber_no) { body_()->fiber_no=fiber_no; }
-  void set_slot_no(uint8_t slot_no) { body_()->slot_no=slot_no; }
-  void set_crate_no(uint8_t crate_no) { body_()->crate_no=crate_no; }
-
-  void set_nhits(uint32_t nhits) {  body_()->nhits=nhits;    }
-
-  /* Frame field and accessors. */
-  virtual uint8_t sof(const unsigned& ) const { return 0; }
-  virtual uint8_t version(const unsigned& ) const { return 0; }
-  virtual uint8_t fiber_no(const unsigned& ) const { return 0; }
-  virtual uint8_t slot_no(const unsigned& ) const { return 0; }
-  virtual uint8_t crate_no(const unsigned& ) const { return 0; }
-  virtual uint8_t mm(const unsigned& ) const { return 0; }
-  virtual uint8_t oos(const unsigned& ) const { return 0; }
-  virtual uint16_t wib_errors(const unsigned& ) const { return 0; }
-  virtual uint64_t timestamp(const unsigned& ) const { return 0; }
-  virtual uint16_t wib_counter(const unsigned& ) const { return 0; }
-
-  /* Coldata block accessors. */
-  virtual uint8_t s1_error(const unsigned&,
-                           const uint8_t&) const { return 0; }
-  virtual uint8_t s2_error(const unsigned&,
-                           const uint8_t&) const { return 0; }
-  virtual uint16_t checksum_a(const unsigned&,
-                              const uint8_t&) const { return 0; }
-  virtual uint16_t checksum_b(const unsigned&,
-                              const uint8_t&) const { return 0; }
-  virtual uint16_t coldata_convert_count(const unsigned&,
-                                         const uint8_t&) const { return 0; }
-  virtual uint16_t error_register(const unsigned&,
-                                  const uint8_t&) const { return 0; }
-  virtual uint8_t hdr(const unsigned&, const uint8_t&,
-                      const uint8_t&) const { return 0; }
-
-  // Functions to return a certain ADC value.
-  virtual adc_t get_ADC(const unsigned&, const uint8_t,
-                        const uint8_t) const { return 0; }
-  virtual adc_t get_ADC(const unsigned&,
-                        const uint8_t) const { return 0; }
-
-  // Function to return all ADC values for a single channel.
-  virtual adc_v get_ADCs_by_channel(const uint8_t,
-                                    const uint8_t) const { return {}; }
-    virtual adc_v get_ADCs_by_channel(const uint8_t) const { return {}; }
-  // Function to return all ADC values for all channels in a map.
-    virtual std::map<uint8_t, adc_v> get_all_ADCs() const { return {}; }
-
-  // Function to print all timestamps.
-  virtual void print_timestamps() const {};
-
-  virtual void print(const unsigned) const {};
-
-  virtual void print_frames() const {};
-
-  virtual ~FelixFragmentHits() {}
-
-  // The number of words in the current event minus the header.
-  virtual size_t total_words() const { return 0; }
-  // The number of frames in the current event.
-  virtual size_t total_frames() const { return 0; }
-  // The number of ADC values describing data beyond the header
-  virtual size_t total_adc_values() const { return 0; }
-
- protected:
-    // artdaq_Fragment_ already points to dataBeginBytes(), thanks to the FelixFragmentBase constructor
-    Body const * body_() const {
-        return reinterpret_cast<FelixFragmentHits::Body const *>( artdaq_Fragment_);
-    }
-    Body * body_() {
-        return reinterpret_cast<FelixFragmentHits::Body*>(const_cast<void*>(artdaq_Fragment_));
-    }
-
-}; // class dune::FelixFragmentHits
 
 //==================================================
 // FELIX fragment for an array of bare FELIX frames
@@ -872,9 +756,7 @@ class dune::FelixFragment : public FelixFragmentBase {
  public:
   FelixFragment(const artdaq::Fragment& fragment)
       : FelixFragmentBase(fragment) {
-    if(meta_.control_word==0xcba){
-      flxfrag = new FelixFragmentHits(fragment);
-    } else if(meta_.compressed) {
+    if(meta_.compressed) {
       flxfrag = new FelixFragmentCompressed(fragment);
     } else if (meta_.reordered) {
       flxfrag = new FelixFragmentReordered(fragment);
