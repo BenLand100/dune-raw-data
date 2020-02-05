@@ -1,6 +1,6 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent dune_raw_data	v2019_08_29_for_dune-artdaq_self_trigger_and_felix
+parent dune_raw_data	v2020_02_04_copy_ProtoDUNE_November2019area
 defaultqual    e15:online:s64
 
 # These optional lines define the installed directories where
