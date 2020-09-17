@@ -17,7 +17,11 @@ art_make(BASENAME_ONLY
   ${MF_MESSAGELOGGER}
   ${MF_MESSAGEUTILITIES}
   ${RCEDAMLIB}
+  ${GALLERY_LIB}
+  ${ART_LIB}
+  art_Framework_Principal
   pthread
+  z
   )
 
 install_headers()
