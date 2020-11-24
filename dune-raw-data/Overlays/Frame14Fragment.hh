@@ -13,10 +13,12 @@
 #include <vector>
 #include <zlib.h>
 
+namespace dune {
+
 //============================
 // Frame14 fragment base class
 //============================
-class dune::Frame14Fragment {
+class Frame14Fragment {
  public:
   /* Struct to hold Frame14Fragment Metadata copied directly from FelixFragment. */
   struct Metadata {
@@ -69,11 +71,11 @@ class dune::Frame14Fragment {
   // Function to return all ADC values for all channels in a map.
   virtual std::map<uint8_t, adc_v> get_all_ADCs() const = 0;
 
-  FrameFragmentBase(const artdaq::Fragment& fragment)
+  Frame14Fragment(const artdaq::Fragment& fragment)
       : meta_(*(fragment.metadata<Metadata>())),
         artdaq_Fragment_(fragment.dataBeginBytes()),
         sizeBytes_(fragment.dataSizeBytes()) { }
-  virtual ~FrameFragmentBase() {}
+  virtual ~Frame14Fragment() {}
   
   // The number of frames in the current event.
   virtual size_t total_frames() const = 0;
@@ -88,7 +90,7 @@ class dune::Frame14Fragment {
 //==================================================
 // Frame fragment for an array of bare Frame frames
 //==================================================
-class dune::Frame14FragmentUnordered : public dune::Frame14FragmentBase {
+class Frame14FragmentUnordered : public Frame14Fragment {
  public:
   /* Frame field and accessors. */
   uint8_t link_mask(const unsigned& frame_ID = 0) const {
@@ -125,16 +127,21 @@ class dune::Frame14FragmentUnordered : public dune::Frame14FragmentBase {
   uint32_t flex24(const unsigned& frame_ID = 0) const {
     return frame_(frame_ID)->flex24;
   }
+
+  size_t total_frames() const {
+    return meta_.num_frames; 
+  }
   
   // Functions to return a certain ADC value.
   adc_t get_ADC(const unsigned& frame_ID, const uint8_t block_ID,
                 const uint8_t channel_ID) const {
     if (block_ID == 0) {
-      return dune::frame14::unpack14(frame_(frame_ID)->femb_a_seg,channel_ID);
+      return frame14::unpack14(frame_(frame_ID)->femb_a_seg,channel_ID);
     } else if (block_ID == 1) {
-      return dune::frame14::unpack14(frame_(frame_ID)->femb_b_seg,channel_ID);
+      return frame14::unpack14(frame_(frame_ID)->femb_b_seg,channel_ID);
     } else {
-      //FIXME throw an exception
+      return -1;
+	  //FIXME throw an exception
     }
   }
   adc_t get_ADC(const unsigned& frame_ID, const uint8_t channel_ID) const {
@@ -164,22 +171,25 @@ class dune::Frame14FragmentUnordered : public dune::Frame14FragmentBase {
       output.insert(std::pair<uint8_t, adc_v>(i, get_ADCs_by_channel(i)));
     return output;
   }
+  
+  
 
   Frame14FragmentUnordered(artdaq::Fragment const& fragment)
-      : Frame14FragmentBase(fragment) {}
+      : Frame14Fragment(fragment) {}
 
  protected:
   // Allow access to individual frames according to the dune::frame14::frame14 structure.
-  dune::frame14::frame14 const* frame_(const unsigned& frame_num = 0) const {
-    return static_cast<dune::frame14::frame14 const*>(artdaq_Fragment_) + frame_num;
+  frame14::frame14 const* frame_(const unsigned& frame_num = 0) const {
+    return static_cast<frame14::frame14 const*>(artdaq_Fragment_) + frame_num;
   }
 }; // class dune::Frame14FragmentUnordered
 
-const Frame14Fragment& ParseFrame14Fragment(const artdaq::Fragment& fragment) {
-  Frame14Fragment::Metadata *meta = fragment.metadata<Frame14Fragment::Metadata>();
+const Frame14Fragment* ParseFrame14Fragment(const artdaq::Fragment& fragment) {
+  // const Frame14Fragment::Metadata *meta = fragment.metadata<Frame14Fragment::Metadata>();
   // Check meta and potentially return a different unpacker 
-  return Frame14FragmentUnordered(fragment);
+  return new Frame14FragmentUnordered(fragment);
 }
 
+}
 
 #endif /* artdaq_dune_Overlays_Frame14Fragment_hh */

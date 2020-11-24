@@ -28,7 +28,7 @@ typedef struct {
 
 
 // Return a single value from packed channel data (56 uint32 words from the WIB)
-inline void unpack14(const uint32_t *packed, size_t index) {
+inline uint16_t unpack14(const uint32_t *packed, size_t i) {
     const size_t low_bit = i*14;
     const size_t low_word = low_bit / 32;
     const size_t high_bit = (i+1)*14-1;
@@ -45,6 +45,8 @@ inline void unpack14(const uint32_t *packed, size_t index) {
     }
 }
 
-}  // namespace dune
+} // namespace frame14
+
+} // namespace dune
 
 #endif /* artdaq_dune_Overlays_Frame14Format_hh */
