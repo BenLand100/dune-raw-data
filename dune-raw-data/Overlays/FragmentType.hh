@@ -17,6 +17,7 @@ namespace dune {
           "CTB",
           "CPUHITS",
           "DEVBOARDHITS",
+          "FRAME14",
           "UNKNOWN" };
 
   namespace detail {
@@ -33,6 +34,7 @@ namespace dune {
 	CTB,
         CPUHITS,
         DEVBOARDHITS,
+        FRAME14,
         INVALID // Should always be last.
         };
 
