@@ -12,11 +12,11 @@ namespace dune {
 
 namespace frame14 {
 
-// Words in the binary format of the Frame frame14 from the WIB
+// Bitfields in the binary format of the Frame frame14 from the WIB
 typedef struct {
     uint32_t start_frame;
-    uint8_t crate_num : 8, frame_version: 4, slot_num : 3, fiber_num : 1;
-    uint8_t femb_valid : 2, link_mask : 8, reserved : 6;
+    uint32_t crate_num : 8, frame_version: 4, slot_num : 3, fiber_num : 1;
+    uint32_t femb_valid : 2, link_mask : 8, reserved : 6;
     uint32_t wib_data;
     uint64_t timestamp;
     uint32_t femb_a_seg[56];
@@ -24,7 +24,7 @@ typedef struct {
     uint32_t crc20 : 20, flex12 : 12;
     uint32_t eof: 8, flex24 : 24;
     uint32_t idle_frame;
-} frame14;
+} __attribute__ ((packed)) frame14;
 
 
 // Return a single value from packed channel data (56 uint32 words from the WIB)
