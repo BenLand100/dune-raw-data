@@ -56,6 +56,15 @@ class Frame14Fragment {
   virtual uint32_t crc20(const unsigned& frame_ID = 0) const = 0;
   virtual uint32_t flex12(const unsigned& frame_ID = 0) const = 0;
   virtual uint32_t flex24(const unsigned& frame_ID = 0) const = 0;
+  
+  virtual uint8_t loss_of_lock(const unsigned& frame_ID = 0) const {
+    throw cet::exception("Frame14Fragment") << "loss_of_lock not implemented\n";
+  }
+  virtual uint8_t link_timestamp(const unsigned& frame_ID, 
+                                  const uint8_t block_ID, 
+                                  const uint8_t link_ID) const {
+    throw cet::exception("Frame14Fragment") << "link_timestamp not implemented\n";
+  }
 
   // Functions to return a certain ADC value.
   virtual adc_t get_ADC(const unsigned& frame_ID, const uint8_t block_ID,
@@ -88,7 +97,7 @@ class Frame14Fragment {
 }; // class dune::FrameFragmentBase
 
 //==================================================
-// Frame fragment for an array of bare Frame frames
+// Frame fragment for an array of bare frames
 //==================================================
 class Frame14FragmentUnordered : public Frame14Fragment {
  public:
@@ -140,8 +149,7 @@ class Frame14FragmentUnordered : public Frame14Fragment {
     } else if (block_ID == 1) {
       return frame14::unpack14(frame_(frame_ID)->femb_b_seg,channel_ID);
     } else {
-      return -1;
-	  //FIXME throw an exception
+      throw cet::exception("Frame14FragmentUnordered") << "invalid block_ID\n";
     }
   }
   adc_t get_ADC(const unsigned& frame_ID, const uint8_t channel_ID) const {
@@ -171,8 +179,6 @@ class Frame14FragmentUnordered : public Frame14Fragment {
       output.insert(std::pair<uint8_t, adc_v>(i, get_ADCs_by_channel(i)));
     return output;
   }
-  
-  
 
   Frame14FragmentUnordered(artdaq::Fragment const& fragment)
       : Frame14Fragment(fragment) {}
@@ -184,10 +190,81 @@ class Frame14FragmentUnordered : public Frame14Fragment {
   }
 }; // class dune::Frame14FragmentUnordered
 
+class Frame14FragmentV2Unordered : public Frame14FragmentUnordered {
+ public:
+  /* Frame field and accessors. */
+
+  
+  uint32_t wib_data(const unsigned& frame_ID = 0) const {
+    throw cet::exception("Frame14FragmentV2Unordered") << "wib_data no longer exists\n";
+  }
+  uint32_t crc20(const unsigned& frame_ID = 0) const {
+    return frame_v2_(frame_ID)->crc20;
+  }
+  uint32_t flex12(const unsigned& frame_ID = 0) const {
+    throw cet::exception("Frame14FragmentV2Unordered") << "flex12 no longer exists\n";
+  }
+  uint32_t flex24(const unsigned& frame_ID = 0) const {
+    throw cet::exception("Frame14FragmentV2Unordered") << "flex24 no longer exists\n";
+  }
+  
+  uint8_t loss_of_lock(const unsigned& frame_ID = 0) const {
+    return frame_v2_(frame_ID)->loss_of_lock;
+  }
+  uint8_t link_timestamp(const unsigned& frame_ID, 
+                                  const uint8_t block_ID, 
+                                  const uint8_t link_ID) const {
+    if (block_ID == 0) {
+      switch (link_ID) {
+        case 0:
+          return frame_v2_(frame_ID)->femb_a_link_0_ts;
+        case 1:
+          return frame_v2_(frame_ID)->femb_a_link_1_ts;
+        case 2:
+          return frame_v2_(frame_ID)->femb_a_link_2_ts;
+        case 3:
+          return frame_v2_(frame_ID)->femb_a_link_3_ts;
+        default:
+          throw cet::exception("Frame14FragmentV2Unordered") << "invalid link_ID\n";
+      }
+    } else if (block_ID == 1) {
+      switch (link_ID) {
+        case 0:
+          return frame_v2_(frame_ID)->femb_b_link_0_ts;
+        case 1:
+          return frame_v2_(frame_ID)->femb_b_link_1_ts;
+        case 2:
+          return frame_v2_(frame_ID)->femb_b_link_2_ts;
+        case 3:
+          return frame_v2_(frame_ID)->femb_b_link_3_ts;
+        default:
+          throw cet::exception("Frame14FragmentV2Unordered") << "invalid link_ID\n";
+      }
+    } else {
+      throw cet::exception("Frame14FragmentV2Unordered") << "invalid block_ID\n";
+    }
+  }
+
+  Frame14FragmentV2Unordered(artdaq::Fragment const& fragment)
+      : Frame14FragmentUnordered(fragment) {}
+
+ protected:
+  // Allow access to individual frames according to the dune::frame14::frame14_v2 structure.
+  frame14::frame14_v2 const* frame_v2_(const unsigned& frame_num = 0) const {
+    return static_cast<frame14::frame14_v2 const*>(artdaq_Fragment_) + frame_num;
+  }
+}; // class dune::Frame14FragmentV2Unordered
+
 const Frame14Fragment* ParseFrame14Fragment(const artdaq::Fragment& fragment) {
-  // const Frame14Fragment::Metadata *meta = fragment.metadata<Frame14Fragment::Metadata>();
-  // Check meta and potentially return a different unpacker 
-  return new Frame14FragmentUnordered(fragment);
+  frame14::frame14 const* frame = (frame14::frame14 const*)(fragment.dataBeginBytes());
+  switch (frame->frame_version) {
+    case 1:
+      return new Frame14FragmentUnordered(fragment);
+    case 2:
+      return new Frame14FragmentV2Unordered(fragment);
+    default:
+      return new Frame14FragmentUnordered(fragment);
+  }
 }
 
 }
